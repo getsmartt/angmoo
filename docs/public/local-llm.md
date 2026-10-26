@@ -33,7 +33,7 @@ OPENAI_COMPAT_BASE_URL=http://127.0.0.1:11434/v1
 OPENAI_COMPAT_CHAT_MODEL=qwen3.6:35b-a3b
 # Optional: a different model per Gemini profile
 # OPENAI_COMPAT_MODEL_MAP=gemini-3.5-flash-lite=gemma4:27b
-OPENAI_COMPAT_EMBEDDING_MODEL=embeddinggemma
+OPENAI_COMPAT_EMBEDDING_MODEL=nomic-embed-text-v2-moe
 OPENAI_COMPAT_CONTEXT_TOKENS=32768
 # json_schema (default) or json_object for servers without schema support
 # OPENAI_COMPAT_JSON_MODE=json_schema
@@ -60,9 +60,16 @@ DIRECT_LLM_DEFAULT_RPM_LIMIT=600
 - **Image recognition:** the chat model, or the model mapped to the recognition
   profile, must accept images.
 - **Embeddings must be 768-dimensional.** Memory and lore vectors are stored as
-  `vector(768)`. `embeddinggemma` and `nomic-embed-text` produce 768 values. A
-  larger Matryoshka-trained model (such as Qwen3-Embedding) can be cut to 768 with
-  `OPENAI_COMPAT_EMBEDDING_TRUNCATE=true`; do not use that with other models.
+  `vector(768)`. The recommended model is **nomic-embed-text-v2-moe**: 768 values,
+  multilingual, about 0.5 GB (Ollama `nomic-embed-text-v2-moe`, Lemonade
+  `nomic-embed-text-v2-moe-GGUF`). In a check on English and Korean sentence pairs,
+  pairs with the same meaning scored about 0.62 and unrelated pairs about 0.08.
+  The original `nomic-embed-text` (v1) is English-only, which suits Angmoo's
+  Korean content poorly. Lemonade's NPU build of EmbeddingGemma
+  (`embed-gemma-300m-FLM`) returned near-random vectors in the same check; don't
+  use it. A larger Matryoshka-trained model (such as Qwen3-Embedding) can be cut
+  to 768 with `OPENAI_COMPAT_EMBEDDING_TRUNCATE=true`; do not use that with other
+  models.
 - **Switching embedding models makes existing vectors incomparable.** Memories and
   lore embedded by Gemini (or another local model) must be embedded again.
 
