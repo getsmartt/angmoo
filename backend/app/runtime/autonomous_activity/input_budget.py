@@ -7,15 +7,23 @@ from time import monotonic
 
 from app.contracts.sns_generation import MODEL_BUDGET_REVISION, read_generation_policies
 from app.domains.world_characters.activity_models import ActivityGraphRun
+from app.config import settings
 from app.integrations.gemini_input_budget import GeminiModelTokenCounter
+from app.integrations.local_input_budget import LocalEstimateTokenCounter
 from app.providers.gemini import prepare_generate_request
 from app.providers.input_budget import InputBudgetError, ModelTokenProfile
+
+
+def default_token_counter():
+    if settings.openai_compatible_enabled:
+        return LocalEstimateTokenCounter(context_tokens=max(1, settings.OPENAI_COMPAT_CONTEXT_TOKENS))
+    return GeminiModelTokenCounter()
 
 
 class SnsInputBudget:
     def __init__(self, db, activity_id, *, counter=None, notify=None):
         self.db, self.activity_id = db, activity_id
-        self.counter = counter or GeminiModelTokenCounter()
+        self.counter = counter or default_token_counter()
         self.notify = notify or (lambda *_: None)
         self.profile = None
         self.cache = OrderedDict()

@@ -2,7 +2,8 @@
 from app.domains.media.interpretation_contracts import ImageAnalysis, parse_analysis
 from app.providers.contracts import ProviderImagePart, ProviderRequest
 from app.providers.generation_profiles import validate_generation_profile
-from app.providers.gemini import GeminiAdapter, build_gemini_developer_response_schema
+from app.providers.gemini import build_gemini_developer_response_schema
+from app.providers.registry import get_provider_adapter
 
 SYSTEM = (
     "Describe only visible content of this image, including readable text. "
@@ -16,11 +17,12 @@ SYSTEM = (
 
 class GeminiImageInterpreter:
     def __init__(self, provider=None):
-        self.provider = provider or GeminiAdapter()
+        self.provider = provider
 
     async def analyze(self, *, key, model, thinking_level, content, content_type):
         validate_generation_profile(model=model, thinking_level=thinking_level)
-        response = await self.provider.generate_json(ProviderRequest(
+        provider = self.provider or get_provider_adapter("google", model)
+        response = await provider.generate_json(ProviderRequest(
             api_key=key, model=model, system_prompt=SYSTEM,
             user_prompt="Analyze this single image as visible evidence.", max_output_tokens=1800,
             timeout_seconds=75, response_schema=build_gemini_developer_response_schema(ImageAnalysis),

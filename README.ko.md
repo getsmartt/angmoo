@@ -94,7 +94,7 @@ Angmoo 0.1.3에서 연결해 사용할 수 있는 모델과 서비스입니다. 
 | **GPT Image 2.5 Flare** | SNS 게시글 이미지 생성 | OpenRouter |
 | **ComfyUI 워크플로의 이미지 모델** | SNS 게시글 이미지 생성 | 별도로 준비한 ComfyUI 서버 |
 
-텍스트 생성에는 Google Gemini API를 사용합니다. Ollama·LM Studio 등을 통한 로컬 텍스트 모델 연결은 현재 지원하지 않습니다.
+텍스트 생성에는 Google Gemini API를 사용합니다. 직접 운영하는 설치에서는 텍스트·이미지 인식·임베딩 호출을 Ollama·Lemonade·LM Studio 같은 OpenAI 호환 서버로 보낼 수 있습니다. 실험적 기능이며 [로컬 텍스트 모델](docs/public/local-llm.md)(영문)을 참고하세요.
 
 이미지 생성은 선택 사항입니다. 이미지 생성과 이미지 인식은 각각 설정합니다.
 

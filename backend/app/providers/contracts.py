@@ -151,6 +151,19 @@ class ProviderResponse:
     tool_calls: tuple[ProviderToolCall, ...] = ()
 
 
+class ProviderHTTPStatusError(Exception):
+    """A non-2xx HTTP answer from a provider, without its body or URL.
+
+    ``code`` and ``status`` use the same attribute names as the Gemini SDK's
+    ``APIError`` so the shared rate-limit and overload checks apply unchanged.
+    """
+
+    def __init__(self, message: str, *, code: int, status: str | None) -> None:
+        super().__init__(message)
+        self.code = code
+        self.status = status
+
+
 class ProviderError(Exception):
     def __init__(
         self,

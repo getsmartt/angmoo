@@ -3,8 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from app.providers.contracts import EmbeddingBatchLimits, ProviderCapabilities
+from app.config import settings
+from app.providers.contracts import EmbeddingAdapter, EmbeddingBatchLimits, ProviderAdapter, ProviderCapabilities
 from app.providers.gemini import GeminiAdapter
+from app.providers.openai_compatible import OpenAICompatibleAdapter
 from app.providers.gemini_embedding_batch import LIMITS as GEMINI_EMBEDDING_LIMITS
 
 
@@ -42,6 +44,13 @@ _MODEL_SPECS = {
     },
 }
 _GEMINI_ADAPTER = GeminiAdapter()
+_OPENAI_COMPATIBLE_ADAPTER = OpenAICompatibleAdapter()
+
+
+def _selected_adapter() -> GeminiAdapter | OpenAICompatibleAdapter:
+    # Server-wide switch: the Gemini profile names stay the stored identity and
+    # the OpenAI-compatible adapter maps them to the configured local models.
+    return _OPENAI_COMPATIBLE_ADAPTER if settings.openai_compatible_enabled else _GEMINI_ADAPTER
 
 
 def normalize_provider_name(provider: str) -> str:
@@ -59,15 +68,15 @@ def get_model_spec(provider: str, model: str) -> ProviderModelSpec:
     return spec
 
 
-def get_provider_adapter(provider: str, model: str) -> GeminiAdapter:
+def get_provider_adapter(provider: str, model: str) -> ProviderAdapter:
     spec = get_model_spec(provider, model)
     if not spec.capabilities.text:
         raise ValueError(f"model does not support text generation: {model}")
-    return _GEMINI_ADAPTER
+    return _selected_adapter()
 
 
-def get_embedding_adapter(provider: str, model: str) -> GeminiAdapter:
+def get_embedding_adapter(provider: str, model: str) -> EmbeddingAdapter:
     spec = get_model_spec(provider, model)
     if not spec.capabilities.embedding:
         raise ValueError(f"model does not support embeddings: {model}")
-    return _GEMINI_ADAPTER
+    return _selected_adapter()

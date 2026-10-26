@@ -68,6 +68,26 @@ class Settings(BaseSettings):
     DIRECT_LLM_RATE_LIMIT_BUFFER_SECONDS: float = 2.0
     DIRECT_LLM_MAX_WAIT_SECONDS: float = 75.0
     DIRECT_LLM_MAX_CALLS_PER_RUN: int = 20
+    # Server-wide text/embedding backend. "openai_compatible" sends every call
+    # that would reach Gemini to one OpenAI-compatible server (Ollama, Lemonade,
+    # LM Studio, llama.cpp) instead; stored credentials keep their Gemini
+    # profile names and are mapped to local models below.
+    LLM_BACKEND: Literal["gemini", "openai_compatible"] = "gemini"
+    OPENAI_COMPAT_BASE_URL: str = "http://127.0.0.1:11434/v1"
+    # Sent as the Bearer token. Stored Gemini keys are never forwarded.
+    OPENAI_COMPAT_API_KEY: SecretStr | None = None
+    OPENAI_COMPAT_CHAT_MODEL: str = ""
+    # Optional per-profile overrides: "gemini-3.5-flash-lite=qwen3.6:35b,...".
+    OPENAI_COMPAT_MODEL_MAP: str = ""
+    OPENAI_COMPAT_EMBEDDING_MODEL: str = ""
+    # Matryoshka-trained models only: keep the first N values and re-normalize.
+    OPENAI_COMPAT_EMBEDDING_TRUNCATE: bool = False
+    OPENAI_COMPAT_CONTEXT_TOKENS: int = 32768
+    OPENAI_COMPAT_JSON_MODE: Literal["json_schema", "json_object"] = "json_schema"
+    OPENAI_COMPAT_SEND_REASONING_EFFORT: bool = False
+    # JSON object merged into every chat request, e.g.
+    # {"chat_template_kwargs": {"enable_thinking": false}}.
+    OPENAI_COMPAT_EXTRA_BODY: str = ""
     LANGGRAPH_MAX_STEPS_PER_RUN: int = 26
     LANGGRAPH_MAX_CONCURRENT_GRAPHS: int = 3
     LANGGRAPH_MAX_CONCURRENT_GEMMA_CALLS: int = 1
@@ -339,6 +359,10 @@ class Settings(BaseSettings):
     @property
     def direct_llm_max_calls_per_run(self) -> int:
         return max(1, self.DIRECT_LLM_MAX_CALLS_PER_RUN)
+
+    @property
+    def openai_compatible_enabled(self) -> bool:
+        return self.LLM_BACKEND == "openai_compatible"
 
     @property
     def langgraph_max_steps_per_run(self) -> int:

@@ -20,6 +20,7 @@ from app.providers.contracts import (
     MeasuredEmbeddingResponse,
     ProviderCapabilities,
     ProviderError,
+    ProviderHTTPStatusError,
     ProviderRequest,
     ProviderResponse,
     ProviderToolCall,
@@ -578,7 +579,8 @@ def classify_generation_failure(exc: Exception) -> ProviderError:
     Do not expose exception messages, response bodies, request URLs or headers.
     Existing callers of normalize_error retain their established behavior.
     """
-    code = exc.code if isinstance(exc, errors.APIError) and type(exc.code) is int else None
+    code = (exc.code if isinstance(exc, (errors.APIError, ProviderHTTPStatusError))
+            and type(exc.code) is int else None)
     failures = {
         400: ("request_invalid", "INVALID_ARGUMENT", False),
         401: ("auth_failed", "UNAUTHENTICATED", False),

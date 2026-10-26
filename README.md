@@ -94,7 +94,7 @@ Angmoo 0.1.3 can connect to the models and services below. Register your own API
 | **GPT Image 2.5 Flare** | Images for social posts | OpenRouter |
 | **Models in your ComfyUI workflow** | Images for social posts | A separately configured ComfyUI server |
 
-Text generation uses the Google Gemini API. Connections to local text models through tools such as Ollama or LM Studio are not currently supported.
+Text generation uses the Google Gemini API. A self-hosted install can instead send text, image-recognition and embedding calls to an OpenAI-compatible server such as Ollama, Lemonade or LM Studio; this is experimental, see [Local text models](docs/public/local-llm.md).
 
 Image generation is optional. Image generation and recognition are configured separately.
 
